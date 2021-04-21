@@ -6,19 +6,15 @@ const client = new MongoClient(uri, { useUnifiedTopology: true } );
 let authquery = async (username, password) => {
     try{
         await client.connect();
-        let user = await client.db("ptud-15").collection("users").findOne({'username':username});
-        if(user){
-            return true
-        } else{
-            return false
-        }
+        const user = await client.db("ptud-15").collection("users").findOne({'username':username});
+        console.log(user);
+        return user;
     }
     catch(err){
         console.log(err)
     }
     finally{
         await client.close();
-        return false;
     }
 }
     // client.connect(function(err, db) {

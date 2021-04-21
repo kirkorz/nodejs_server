@@ -1,3 +1,4 @@
+const { decode } = require("jsonwebtoken");
 const { token } = require("morgan");
 const jwtHelper = require("../helpers/jwt.helper");
 const accessTokenSecret = "secrettoken";
@@ -7,6 +8,7 @@ let isAuth = async(req,res,next)=>{
     if(tokenFromClient){
         try{
             const decoded = await jwtHelper.verifyToken(tokenFromClient,accessTokenSecret);
+            req.decoded = decoded;
             next();
         } catch(error){
             console.log(error);

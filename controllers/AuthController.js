@@ -2,8 +2,14 @@ const { decode } = require("jsonwebtoken");
 const { token } = require("morgan");
 const jwtHelper = require("../helpers/jwt.helper");
 const {authquery} = require("../mongodbquery/checkauth");
-
 let tokenList = {}
+const auth = require('../middleware/auth');
+
+
+
+const { MongoClient } = require('mongodb');
+const uri = 'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false'
+
 
 const accessTokenLife = process.env.ACCESS_TOKEN_LIFE || "1h";
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET || "secrettoken";
@@ -12,31 +18,23 @@ const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET || "refresh-sercrett
 
 let login = async(req,res) =>{
     try{
+        const client = new MongoClient(uri, { useUnifiedTopology: true } );
         username = req.body.username;
         password = req.body.password;
-        if(authquery(username,password)){
-            console.log('suss');
-        }
-        else{
-            console.log('fail');
-        }
-            
-        // if(username != 'baor666' || password != '123456'){
-        //     return res.status(404).json('notfound');
-        // }
-        const user = {
-            id:'1234',
-            name: 'baor',
-            username:'baor',
-            email: req.body.email,
-        };
+        await client.connect({native_parser:true});
+        const user = await client.db("ptud-15").collection("users").findOne({'username':username});
+        check = String(user['is_mod']);
         const accessToken = await jwtHelper.generateToken(user,accessTokenSecret,accessTokenLife);
         const refreshToken = await jwtHelper.generateToken(user,refreshTokenSecret,refreshTokenLife);
         tokenList[refreshToken] = {accessToken,refreshToken};
-        return res.status(200).json({accessToken,refreshToken});
+        await client.close();
+        return res.status(200).json({accessToken,refreshToken,check});
     } catch(error){
         return res.status(500).json(error);
     }
+    // finally{
+    //     await client.close();
+    // }
 }
 
 let refreshToken = async (req,res)=>{

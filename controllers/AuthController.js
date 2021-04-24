@@ -24,11 +24,12 @@ let login = async(req,res) =>{
         await client.connect({native_parser:true});
         const user = await client.db("ptud-15").collection("users").findOne({'username':username});
         check = String(user['is_mod']);
+        username = user['name'];
         const accessToken = await jwtHelper.generateToken(user,accessTokenSecret,accessTokenLife);
         const refreshToken = await jwtHelper.generateToken(user,refreshTokenSecret,refreshTokenLife);
         tokenList[refreshToken] = {accessToken,refreshToken};
         await client.close();
-        return res.status(200).json({accessToken,refreshToken,check});
+        return res.status(200).json({accessToken,refreshToken,check,username});
     } catch(error){
         return res.status(500).json(error);
     }

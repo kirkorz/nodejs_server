@@ -17,6 +17,7 @@ let isAuth = async(req,res,next)=>{
             });
         }
     } else{
+        console.log('not auth');
         return res.status(403).send({message: 'No token provided.'})
     }
 }

@@ -1,7 +1,6 @@
 const { decode } = require("jsonwebtoken");
 const { token } = require("morgan");
 const jwtHelper = require("../helpers/jwt.helper");
-const {authquery} = require("../mongodbquery/checkauth");
 let tokenList = {}
 const auth = require('../middleware/auth');
 

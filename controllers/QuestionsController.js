@@ -1,54 +1,39 @@
-const { MongoClient } = require('mongodb');
-const uri = 'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false'
-var ObjectID = require('mongodb').ObjectID;
-let getQuestions = async(req,res) =>{
+const Dbquery = require('../mongodbquery/questiondb')
+
+let getQuestions_user = async(req,res) =>{
     try{
-        const client = new MongoClient(uri, { useUnifiedTopology: true } );
-        await client.connect({native_parser:true});
-        const questions = await client.db("ptud-15").collection("questions").aggregate([{$match:{'author':ObjectID(req.decoded['data'])}},{$lookup:{from:'comments',localField:'_id',foreignField:'node_id',as: 'comments'}}]).toArray();
-        await client.close();
-        return res.status(200).json(questions);
+        // req.body.skip = 0;
+        // req.body.limit = 5;
+        req.body.user_id = req.decoded['data'];
+        const result = await Dbquery.getQuestions_user(req.body)
+        return res.status(200).json(result);
     } catch(error){
         return res.status(500).json(error);
     }
 }
 let postQuestions = async(req,res) => {
     try{
-        const client = new MongoClient(uri, { useUnifiedTopology: true } );
-        await client.connect({native_parser:true});
-        const questions = {
-            'title':req.body.title,
-            'detail':req.body.detail,
-            'author': ObjectID(req.decoded['data']),
-            'created_at': new Date()
-        }
-        const result = await client.db("ptud-15").collection("questions").insertOne(questions);
-        await client.close();
-        return res.status(200).json(questions);
-    } catch(error){
-        return res.status(500).json(error);
-    }
-}
-let getQuestionsbyId = async(req,res) => {
-    try{
-        const client = new MongoClient(uri, { useUnifiedTopology: true } );
-        await client.connect({native_parser:true});
-        const id = ObjectID(req.params.questionsId);
-        // const result = await client.db("ptud-15").collection("questions").findOne({'_id':id});
-        const result = await client.db("ptud-15").collection("questions").aggregate([{$match:{'_id':id}},{$lookup:{from:'users',localField:'author',foreignField:'_id',as:'authors'}},{$lookup:{from:'comments',localField:'_id',foreignField:'node_id',as: 'comments'}}]).toArray();
-        await client.close();
+        req.body.user_id = req.decoded['data'];
+        const result = await Dbquery.postQuestions(req.body)
         return res.status(200).json(result);
     } catch(error){
         return res.status(500).json(error);
     }
 }
-let getQuestionsall = async(req,res) => {
+let getQuestions_Id = async(req,res) => {
     try{
-        const client = new MongoClient(uri, { useUnifiedTopology: true } );
-        await client.connect({native_parser:true});
-        const result = await client.db("ptud-15").collection("questions").find({}).toArray();
-        //const result = await client.db("ptud-15").collection("questions").aggregate([{$lookup:{from:'comments',localField:'_id',foreignField:'node_id',as: 'comments'}}]).toArray();
-        await client.close();
+        req.body.id = req.params.questionsId;
+        const result = await Dbquery.getQuestions_ID(req.body);
+        return res.status(200).json(result);
+    } catch(error){
+        return res.status(500).json(error);
+    }
+}
+let getQuestions_all = async(req,res) => {
+    try{
+        // req.body.skip = 0;
+        // req.body.limit = 5;
+        const result = await Dbquery.getQuestions_all(req.body);
         return res.status(200).json(result);
     } catch(error){
         return res.status(500).json(error);
@@ -56,10 +41,9 @@ let getQuestionsall = async(req,res) => {
 }
 let deleteQuestions = async(req,res)=>{
     try{
-        const client = new MongoClient(uri, { useUnifiedTopology: true } );
-        await client.connect({native_parser:true});
-        const result = await client.db("ptud-15").collection("questions").deleteOne({'author':ObjectID(req.decoded['data']),'_id':ObjectID(req.params.questionsId)});
-        await client.close();
+        req.body.user_id = req.decoded['data'];
+        req.body.questionsId = req.params.questionsId;
+        const result = await Dbquery.deleteQuestions(req.body);
         return res.status(200).json(result);
     } catch(error){
         return res.status(500).json(error);
@@ -68,21 +52,30 @@ let deleteQuestions = async(req,res)=>{
 
 let putQuestions = async(req,res)=>{
     try{
-        const client = new MongoClient(uri, { useUnifiedTopology: true } );
-        await client.connect({native_parser:true});
-        const result = await client.db("ptud-15").collection("questions").updateOne({'author':ObjectID(req.decoded['data']),'_id':ObjectID(req.params.questionsId)},{'detail':req.body.detail});
-        await client.close();
+        req.body.user_id = req.decoded['data'];
+        const result = await Dbquery.putQuestions(req.body);
         return res.status(200).json(result);
     } catch(error){
         return res.status(500).json(error);
     }
 }
 
+let searchQuestions = async(req,res) => {
+    try{
+        const result = await Dbquery.getQuestions_text(req.body); 
+        return res.status(200).json(result);
+    } catch (error){
+        console.log(error);
+        return res.status(500).json(error);
+    }
+}
+
 module.exports = {
-    getQuestions:getQuestions,
+    getQuestions_user:getQuestions_user,
     postQuestions:postQuestions,
-    getQuestionsbyId:getQuestionsbyId,
-    getQuestionsall:getQuestionsall,
+    getQuestions_Id:getQuestions_Id,
+    getQuestions_all:getQuestions_all,
     deleteQuestions:deleteQuestions,
-    putQuestions:putQuestions
+    putQuestions:putQuestions,
+    searchQuestions:searchQuestions
 }

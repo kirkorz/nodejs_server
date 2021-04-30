@@ -6,8 +6,9 @@ let getQuestions_all = async(data)=>{
     try{
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
-        const result = await client.db("ptud-15").collection("questions").find({}).skip(1 * data.skip||0).limit(data.limit||5).toArray();
-        const count = await client.db("ptud-15").collection("questions").find({}).count();
+        const query = {'is_pub':'true'};
+        const result = await client.db("ptud-15").collection("questions").find(query).skip(1 * data.skip||0).limit(data.limit||5).toArray();
+        const count = await client.db("ptud-15").collection("questions").find(query).count();
         await client.close();
         return {result,count};
     } catch(err){
@@ -65,6 +66,8 @@ let postQuestions = async(data)=>{
             'author': ObjectID(data.user_id),
             'created_at': new Date(),
             'page_of_comment': 0,
+            'tags': data.tags.split(','),
+            'is_pub': 'false'
         }
         const result = await client.db("ptud-15").collection("questions").insertOne(questions);
         await client.close();
@@ -79,6 +82,7 @@ let deleteQuestions = async(data)=>{
     try{
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
+        const delans = await client.db("ptud-15").collection("comments").deleteMany({'node_id':ObjectID(data.questionsId)});
         const result = await client.db("ptud-15").collection("questions").deleteOne({'author':ObjectID(data.user_id),'_id':ObjectID(data.questionsId)});
         if(result['deletedCount'] == 0){
             throw err;

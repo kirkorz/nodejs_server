@@ -4,10 +4,7 @@ const jwtHelper = require("../helpers/jwt.helper");
 let tokenList = {}
 const auth = require('../middleware/auth');
 
-
-
-const { MongoClient } = require('mongodb');
-const uri = 'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false'
+const Dbquery = require('../mongodbquery/auth.js')
 
 
 const accessTokenLife = process.env.ACCESS_TOKEN_LIFE || "1h";
@@ -15,26 +12,26 @@ const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET || "secrettoken";
 const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE || "3650d";
 const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET || "refresh-sercrettoken";
 
-let login = async(req,res) =>{
+let signup = async(req,res) =>{
     try{
-        const client = new MongoClient(uri, { useUnifiedTopology: true } );
-        username = req.body.username;
-        password = req.body.password;
-        await client.connect({native_parser:true});
-        const user = await client.db("ptud-15").collection("users").findOne({'username':username});
-        check = String(user['is_mod']);
-        username = user['name'];
-        const accessToken = await jwtHelper.generateToken(user,accessTokenSecret,accessTokenLife);
-        const refreshToken = await jwtHelper.generateToken(user,refreshTokenSecret,refreshTokenLife);
-        tokenList[refreshToken] = {accessToken,refreshToken};
-        await client.close();
-        return res.status(200).json({accessToken,refreshToken,check,username});
+        const result = Dbquery.singup(req.body);
+        return res.status(200).json(result);
     } catch(error){
         return res.status(500).json(error);
     }
-    // finally{
-    //     await client.close();
-    // }
+}
+let login = async(req,res) =>{
+    try{
+        
+        const user = await Dbquery.login(req.body);
+        const check = user['is_mod']; 
+        const accessToken = await jwtHelper.generateToken(user,accessTokenSecret,accessTokenLife);
+        const refreshToken = await jwtHelper.generateToken(user,refreshTokenSecret,refreshTokenLife);
+        tokenList[refreshToken] = {accessToken,refreshToken};
+        return res.status(200).json({accessToken,refreshToken,check});
+    } catch(error){
+        return res.status(500).json(error);
+    }
 }
 
 let refreshToken = async (req,res)=>{
@@ -56,4 +53,5 @@ let refreshToken = async (req,res)=>{
 module.exports = {
     login:login,
     refreshToken:refreshToken,
+    signup:signup
 }

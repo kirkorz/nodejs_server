@@ -3,6 +3,7 @@ var router = express.Router();
 const AuthController = require("../controllers/AuthController")
 const AuthMiddleWare = require("../middleware/auth")
 
+router.post("/signup",AuthController.signup);
 router.post("/login",AuthController.login);
 router.post("/refresh-token",AuthController.refreshToken);
 router.use(AuthMiddleWare.isAuth);

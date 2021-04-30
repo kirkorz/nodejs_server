@@ -9,6 +9,7 @@
     "@grpc/grpc-js": "^1.2.12",
     "@grpc/proto-loader": "^0.6.1",
     "async": "^3.2.0",
+    "bcryptjs": "^2.4.3",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "express": "~4.16.1",

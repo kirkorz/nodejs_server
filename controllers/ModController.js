@@ -32,8 +32,17 @@ let notcheck = async(req,res) =>{
         return res.status(500).json(error);
     }
 }
+let addCategory = async(req,res)=>{
+    try{
+        const result = await Dbquery.addCategory(req.body);
+        return res.status(200).json(result);
+    } catch(error){
+        return res.status(500).json(error);
+    }
+}
 module.exports = {
     makePublic:makePublic,
     deleteQuestion : deleteQuestion,
-    notcheck: notcheck
+    notcheck: notcheck,
+    addCategory: addCategory,
 }

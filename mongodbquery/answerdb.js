@@ -1,10 +1,10 @@
 const { MongoClient } = require('mongodb');
-const uri = 'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false'
+// const uri = 'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false'
+const uri = 'mongodb+srv://baor000:moFexFUmwovUMN2Q@cluster0.e3ane.gcp.mongodb.net/ptud-15?retryWrites=true&w=majority'
 var ObjectID = require('mongodb').ObjectID;
 
 let getAnswers = async(data)=>{
     try{
-        console.log(data);
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
         const result = await client.db("ptud-15").collection("comments").findOne({

@@ -18,7 +18,7 @@ let getAnswers = async(req,res) =>{
 
 let postAnswers = async(req,res) =>{
     try{
-        req.body.user_id =  req.decoded['data'];
+        req.body.user_id =  req.decoded['id'];
         const result = await Dbquery.postAnswers(req.body);
         return res.status(200).json(result);
     } catch(error){

@@ -1,12 +1,14 @@
 const { MongoClient } = require('mongodb');
-const uri = 'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false'
+// const uri = 'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false'
+const uri = 'mongodb+srv://baor000:moFexFUmwovUMN2Q@cluster0.e3ane.gcp.mongodb.net/ptud-15?retryWrites=true&w=majority'
+
 var ObjectID = require('mongodb').ObjectID;
 
 let getQuestions_all = async(data)=>{
     try{
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
-        const query = {'is_pub':'true'};
+        const query = {'live':'true'};
         const result = await client.db("ptud-15").collection("questions").find(query).skip(1 * data.skip||0).limit(data.limit||5).toArray();
         const count = await client.db("ptud-15").collection("questions").find(query).count();
         await client.close();
@@ -47,8 +49,10 @@ let getQuestions_user = async(data)=>{
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
         const user_id = ObjectID(data.user_id)
+        console.log(data.user_id);
         const result = await client.db("ptud-15").collection("questions").find({'author':user_id}).skip(1 * data.skip||0).limit(data.limit||5).toArray();
         const count = await client.db("ptud-15").collection("questions").find({'author':user_id}).count();
+        console.log(result);
         //const result = await client.db("ptud-15").collection("questions").aggregate([{$match:{'author':user_id}},{$lookup:{from:'comments',localField:'_id',foreignField:'node_id',as: 'comments'}}]).toArray();
         await client.close();
         return {result,count};
@@ -67,7 +71,7 @@ let postQuestions = async(data)=>{
             'created_at': new Date(),
             'page_of_comment': 0,
             'tags': data.tags.split(','),
-            'is_pub': 'false'
+            'live': 'false'
         }
         const result = await client.db("ptud-15").collection("questions").insertOne(questions);
         await client.close();
@@ -106,6 +110,23 @@ let putQuestions = async(data)=>{
     }
 }
 
+let getQuestions_tag = async(data)=>{
+    try{
+        const client = new MongoClient(uri, { useUnifiedTopology: true } );
+        await client.connect({native_parser:true});
+        if (typeof(data.tags) == 'string'){
+            var query = {'tags':{'$all': [data.tags]}}
+        } else {
+            var query = {'tags':{'$all': data.tags}}
+        }
+        const result = await client.db("ptud-15").collection("questions").find(query).toArray();
+        await client.close();
+        return result;
+    } catch(error){
+        throw error;
+    }
+}
+
 
 module.exports ={
     getQuestions_all:getQuestions_all,
@@ -114,7 +135,8 @@ module.exports ={
     getQuestions_user:getQuestions_user,
     postQuestions:postQuestions,
     putQuestions:putQuestions,
-    deleteQuestions:deleteQuestions
+    deleteQuestions:deleteQuestions,
+    getQuestions_tag:getQuestions_tag
 }
 
 

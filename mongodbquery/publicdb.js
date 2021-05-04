@@ -1,5 +1,6 @@
 const { MongoClient } = require('mongodb');
-const uri = 'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false'
+// const uri = 'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false'
+const uri = 'mongodb+srv://baor000:moFexFUmwovUMN2Q@cluster0.e3ane.gcp.mongodb.net/ptud-15?retryWrites=true&w=majority'
 var ObjectID = require('mongodb').ObjectID;
 
 let makePublic = async(data)=>{
@@ -40,8 +41,23 @@ let notcheck = async(data)=>{
         throw err;
     }   
 }
+let addCategory = async(data)=>{
+    try{
+        const client = new MongoClient(uri, { useUnifiedTopology: true } );
+        await client.connect({native_parser:true});
+        const query = {'_id':ObjectID(data.questionsId)};
+        const options = {'$push':{'category':{ "$each": data.category.split(',')}}};
+        const result = await client.db("ptud-15").collection("questions").updateOne(query,options,{"upsert" : true});
+        await client.close();
+        console.log(result);
+        return result;
+    } catch(err){
+        throw err;
+    }   
+}
 module.exports={
     makePublic : makePublic,
     deleteQuestion: deleteQuestion,
-    notcheck: notcheck
+    notcheck: notcheck,
+    addCategory:addCategory
 }

@@ -9,7 +9,7 @@ let getQuestions_all = async(data)=>{
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
         const query = {'live':'true'};
-        const result = await client.db("ptud-15").collection("questions").find(query).skip(1 * data.skip||0).limit(data.limit||5).toArray();
+        const result = await client.db("ptud-15").collection("questions").find(query).skip(1 * data.skip||0).limit(1 * data.limit||5).toArray();
         const count = await client.db("ptud-15").collection("questions").find(query).count();
         await client.close();
         return {result,count};

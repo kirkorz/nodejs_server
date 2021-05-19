@@ -50,7 +50,7 @@ let getQuestions_user = async(data)=>{
         await client.connect({native_parser:true});
         const user_id = ObjectID(data.user_id)
         console.log(data.user_id);
-        const result = await client.db("ptud-15").collection("questions").find({'author':user_id}).skip(1 * data.skip||0).limit(data.limit||5).toArray();
+        const result = await client.db("ptud-15").collection("questions").find({'author':user_id}).skip(1 * data.skip||0).limit(1 * data.limit||5).toArray();
         const count = await client.db("ptud-15").collection("questions").find({'author':user_id}).count();
         console.log(result);
         //const result = await client.db("ptud-15").collection("questions").aggregate([{$match:{'author':user_id}},{$lookup:{from:'comments',localField:'_id',foreignField:'node_id',as: 'comments'}}]).toArray();
@@ -102,10 +102,11 @@ let putQuestions = async(data)=>{
     try{
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
-        const result = await client.db("ptud-15").collection("questions").updateOne({'author':ObjectID(data.user_id),'_id':ObjectID(data.questionsId)},{'detail':data.detail});
+        const result = await client.db("ptud-15").collection("questions").updateOne({'author':ObjectID(data.user_id),'_id':ObjectID(data.questionsId)},{'$set': {'detail':data.detail}});
         await client.close();
         return result;
     } catch(error){
+        console.log(error);
         throw error;
     }
 }

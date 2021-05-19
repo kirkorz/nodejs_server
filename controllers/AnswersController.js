@@ -30,7 +30,7 @@ let deleteAnswers = async(req,res)=>{
     }
 }
 module.exports = {
+    deleteAnswers:deleteAnswers,
     postAnswers:postAnswers,
     getAnswers : getAnswers,
-    deleteAnswers: deleteAnswers
 }

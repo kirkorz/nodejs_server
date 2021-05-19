@@ -44,7 +44,7 @@ let getAnswers = async(data)=>{
         // });
         // const count = await client.db("ptud-15").collection("questions").findOne({'_id':ObjectID(data.node_id)},{ projection:{'page_of_comment':1}});
         // await client.close();
-        console.log(result);
+        // console.log(result);
         return {result,skip: data.skip,limit: data.limit};
     } catch(err){
         throw err;

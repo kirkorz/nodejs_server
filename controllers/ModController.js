@@ -1,8 +1,3 @@
-const { query } = require('express');
-const { MongoClient, Db } = require('mongodb');
-const uri = 'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false'
-var ObjectID = require('mongodb').ObjectID;
-
 const Dbquery = require('../mongodbquery/publicdb');
 
 

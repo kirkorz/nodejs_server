@@ -11,6 +11,7 @@ var questionsRouter = require('./routes/questions');
 var answersRouter = require('./routes/answers');
 var publicRouter = require('./routes/public'); 
 var modRouter = require('./routes/mod');
+var votesRouter = require('./routes/votes');
 const AuthMiddleWare = require("./middleware/auth")
 
 
@@ -33,6 +34,7 @@ app.use('/api/public',publicRouter);
 app.use('/users',AuthMiddleWare.isAuth, usersRouter);
 app.use('/api',AuthMiddleWare.isAuth,questionsRouter);
 app.use('/api',AuthMiddleWare.isAuth,answersRouter);
+app.use('/api',AuthMiddleWare.isAuth,votesRouter);
 app.use('/mod',AuthMiddleWare.isMod,modRouter);
 
 // catch 404 and forward to error handler

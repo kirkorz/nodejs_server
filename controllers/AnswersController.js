@@ -1,8 +1,3 @@
-const { query } = require('express');
-const { MongoClient, Db } = require('mongodb');
-const uri = 'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false'
-var ObjectID = require('mongodb').ObjectID;
-
 const Dbquery = require('../mongodbquery/answerdb');
 
 
@@ -25,8 +20,17 @@ let postAnswers = async(req,res) =>{
         return res.status(500).json(error);
     }
 }
-
+let deleteAnswers = async(req,res)=>{
+    try{
+        req.body.user_id = req.decoded['id'];
+        const result = await Dbquery.deleteAnswers(req.body);
+        return res.status(200).json(result);
+    } catch(error){
+        return res.status(500).json(error);
+    }
+}
 module.exports = {
     postAnswers:postAnswers,
     getAnswers : getAnswers,
+    deleteAnswers: deleteAnswers
 }

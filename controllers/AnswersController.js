@@ -26,7 +26,17 @@ let postAnswers = async(req,res) =>{
     }
 }
 
+let deleteAnswers = async(req,res)=>{
+    try{
+        req.body.user_id = req.decoded['id'];
+        const result = await Dbquery.deleteAnswers(req.body);
+        return res.status(200).json(result);
+    } catch(error){
+        return res.status(500).json(error);
+    }
+}
 module.exports = {
+    deleteAnswers:deleteAnswers,
     postAnswers:postAnswers,
     getAnswers : getAnswers,
 }

@@ -51,6 +51,7 @@ let deleteQuestions = async(req,res)=>{
 let putQuestions = async(req,res)=>{
     try{
         req.body.user_id = req.decoded['id'];
+        req.body.questionsId = req.params.questionsId;
         const result = await Dbquery.putQuestions(req.body);
         return res.status(200).json(result);
     } catch(error){

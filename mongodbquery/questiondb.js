@@ -102,7 +102,7 @@ let putQuestions = async(data)=>{
     try{
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
-        const result = await client.db("ptud-15").collection("questions").updateOne({'author':ObjectID(data.user_id),'_id':ObjectID(data.questionsId)},{'detail':req.body.detail});
+        const result = await client.db("ptud-15").collection("questions").updateOne({'author':ObjectID(data.user_id),'_id':ObjectID(data.questionsId)},{'detail':data.detail});
         await client.close();
         return res.status(200).json(result);
     } catch(error){

@@ -104,7 +104,7 @@ let putQuestions = async(data)=>{
         await client.connect({native_parser:true});
         const result = await client.db("ptud-15").collection("questions").updateOne({'author':ObjectID(data.user_id),'_id':ObjectID(data.questionsId)},{'$set': {'detail':data.detail}});
         await client.close();
-        return res.status(200).json(result);
+        return result;
     } catch(error){
         console.log(error);
         throw error;

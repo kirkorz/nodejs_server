@@ -106,6 +106,7 @@ let putQuestions = async(data)=>{
         await client.close();
         return res.status(200).json(result);
     } catch(error){
+        console.log(error);
         throw error;
     }
 }

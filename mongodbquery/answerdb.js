@@ -102,7 +102,25 @@ let postAnswers = async(data)=>{
         throw err;
     }   
 }
+
+
+let deleteAnswers = async(data)=>{
+    try {
+        const client = new MongoClient(uri, { useUnifiedTopology: true } );
+        await client.connect({native_parser:true});
+        const result = await client.db("ptud-15").collection("comments").updateOne({'comments._id':ObjectID(data.id)},
+        {
+            '$inc':{ 'count':-1},
+            '$pull': { 'comments': { '_id': ObjectID(data.id),'author._id': ObjectID(data.user_id) } }
+        })
+        await client.close();
+        return result; 
+    } catch (error) {
+        throw error;
+    }
+}
 module.exports = {
     getAnswers: getAnswers,
-    postAnswers:postAnswers
+    postAnswers:postAnswers,
+    deleteAnswers:deleteAnswers
 }

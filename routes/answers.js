@@ -5,6 +5,7 @@ const AnswersController = require("../controllers/AnswersController");
 
 
 router.post("/answers",AnswersController.postAnswers);
-  
+router.delete("/answers",AnswersController.deleteAnswers);
+
 module.exports = router;
   

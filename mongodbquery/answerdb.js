@@ -57,7 +57,6 @@ let postAnswers = async(data)=>{
         await client.connect({native_parser:true});
         const node = await client.db("ptud-15").collection("questions").findOne({'_id':ObjectID(data.node_id)});
         const author = await client.db("ptud-15").collection("users").findOne({'_id':ObjectID(data.user_id)})
-        console.log(author);
         var comment = {
             '_id':new ObjectID(),
             'posted': new Date(),

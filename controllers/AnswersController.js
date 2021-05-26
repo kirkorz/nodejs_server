@@ -1,4 +1,5 @@
 const Dbquery = require('../mongodbquery/answerdb');
+const axios = require('axios');
 
 
 let getAnswers = async(req,res) =>{
@@ -14,8 +15,14 @@ let getAnswers = async(req,res) =>{
 let postAnswers = async(req,res) =>{
     try{
         req.body.user_id =  req.decoded['id'];
-        const result = await Dbquery.postAnswers(req.body);
-        return res.status(200).json(result);
+        const flag = await axios.post('http://localhost:3000/text',{
+            "content": "ASD asd"
+            })
+        if(flag.data.status){
+            const result = await Dbquery.postAnswers(req.body);
+            return res.status(200).json(result);
+        }
+        throw err;
     } catch(error){
         return res.status(500).json(error);
     }

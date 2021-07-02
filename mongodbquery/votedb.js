@@ -3,54 +3,83 @@ const uri = config.mongodb;
 const { MongoClient, ObjectId } = require('mongodb');
 var ObjectID = require('mongodb').ObjectID;
 
-let postVotes = async(data)=>{
+let postVote = async(userId,objectId,upVote)=>{ // upvote = [-1,0,1]
     try{
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
-        const rev = {
-            "user": ObjectID(data.userId),
-            "star": 1 * data.rate
-        };
         const flag = await client.db("ptud-15").collection("votes").findOne({
-            'object':ObjectID(data.objectId),
-            "reviews.user" : { $in : [ObjectID(data.userId)]}         
+            "object":ObjectID(objectId),
+            "user" : ObjectID(userId)
         }) 
         if(flag){
             var ratedBefore = await client.db("ptud-15").collection("votes").findOne({
-                'object':ObjectID(data.objectId),
-                "reviews.user" : { $eq : ObjectID(data.userId)}         
-            });
-            if(ratedBefore.reviews[0].star == rev.star){
-                const addvote = await client.db("ptud-15").collection("votes").updateOne({
-                    'object': ObjectID(data.objectId) 
+                'object':ObjectID(objectId),
+                'user': ObjectID(userId) 
+            })
+            if(ratedBefore.status == 1 * upVote){
+                await client.db("ptud-15").collection("votes").deleteOne({
+                    'object':ObjectID(objectId),
+                    'user': ObjectID(userId)
+                })
+                if (1 * upVote > 0){
+                    var result = await client.db("ptud-15").collection("questions").updateOne({
+                        '_id': ObjectID(objectId),
+                    },
+                    {
+                        '$inc':{upvote: - 1 }
+                    })
+                } else{
+                    var result = await client.db("ptud-15").collection("questions").updateOne({
+                        '_id': ObjectID(objectId),
+                    },
+                    {
+                        '$inc':{downvote: - 1 }
+                    })
+                }
+                 
+            } else {
+                await client.db("ptud-15").collection("votes").updateOne({
+                    'object':ObjectID(objectId),
+                    'user': ObjectID(userId)
                 },{
-                    '$pull': {'reviews': {'user': ObjectId(data.userId)}}
-                })
-                var result = await client.db('ptud-15').collection('votes').updateOne({'object':ObjectId(data.objectId)},
-                {
-                    '$inc': {'rateCount': -1, 'rateValue': data.rate*-1}
-                })
-            } else{
-                const addvote = await client.db("ptud-15").collection("votes").updateOne({
-                    'object': ObjectID(data.objectId), 
-                    "reviews.user":{ $eq : ObjectID(data.userId)}
-                },
-                {
-                    '$set': {"reviews.$.star": data.rate}
-                })
-                var result = await client.db('ptud-15').collection('votes').updateOne({'object':ObjectId(data.objectId)},{
-                    '$inc': {'rateValue': data.rate * 1 - ratedBefore['rate']}
-                })
+                    "$set": {"status": 1 * upVote}
+                }) 
+                if (1 * upVote > 0){
+                    var result = await client.db("ptud-15").collection("questions").updateOne({
+                        "_id": ObjectID(objectId),
+                    },{
+                        "$inc": {downvote: -1,upvote: 1}
+                    })
+                } else{
+                    var result = await client.db("ptud-15").collection("questions").updateOne({
+                        '_id': ObjectID(objectId),
+                    },
+                    {
+                        '$inc':{downvote: 1,upvote: -1 }
+                    })
+                }
             }
         } else {
-            var result = await client.db("ptud-15").collection("votes").updateOne({
-                'object':ObjectID(data.objectId),         
-            },{
-                "$push":{"reviews":rev},
-                "$inc": {"rateValue": rev.star,"rateCount": 1}
-            },
-            { upsert: true }
-            );
+            await client.db("ptud-15").collection("votes").insertOne({
+                "object": ObjectID(objectId),
+                "user": ObjectID(userId),
+                "status": 1 * upVote}
+                )
+            if(1 * upVote > 0){
+                console.log("???")
+                var result = await client.db("ptud-15").collection("questions").updateOne({
+                    "_id": ObjectID(objectId),
+                },{
+                    "$inc": { "upvote" : 1 }
+                })
+            }
+            else{
+                var result = await client.db("ptud-15").collection("questions").updateOne({
+                    "_id": ObjectID(objectId),
+                },{
+                    "$inc": { "downvote": 1 }
+                })
+            }
         }
         await client.close();
         return result;
@@ -58,7 +87,20 @@ let postVotes = async(data)=>{
         throw err;
     }
 }
-
+let postReport = async(userId,objectId)=>{
+    try{
+        const client = new MongoClient(uri, { useUnifiedTopology: true } );
+        await client.connect({native_parser:true});
+        const result = await client.db("ptud-15").collection("reports").updateOne({
+            "object":ObjectID(objectId),
+            "user" : ObjectID(userId)
+        },{upsert : true}) 
+        await client.close();
+        return result;
+    } catch(e){
+        throw e;
+    }
+}
 // let postVotes = async(data)=>{
 //     try{
 //         const client = new MongoClient(uri, { useUnifiedTopology: true } );
@@ -111,6 +153,7 @@ let postVotes = async(data)=>{
 //     }  
 // }
 module.exports = {
-    postVotes: postVotes,
+    postVote: postVote,
+    postReport: postReport,
     // getVotes: getVotes
 }

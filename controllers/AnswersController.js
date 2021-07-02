@@ -14,23 +14,21 @@ let getAnswers = async(req,res) =>{
 
 let postAnswers = async(req,res) =>{
     try{
-        req.body.user_id =  req.decoded['id'];
-        const flag = await axios.post('http://localhost:3000/text',{
-            "content": "ASD asd"
-            })
-        if(flag.data.status){
-            const result = await Dbquery.postAnswers(req.body);
-            return res.status(200).json(result);
+        if(req.decoded['role']!='user'){
+            return res.status(500).json('e');
         }
-        throw err;
+        const result = await Dbquery.postAnswers(req.decoded['id'],req.body.nodeId,comment);
+        return res.status(200).json(result);
     } catch(error){
         return res.status(500).json(error);
     }
 }
 let deleteAnswers = async(req,res)=>{
     try{
-        req.body.user_id = req.decoded['id'];
-        const result = await Dbquery.deleteAnswers(req.body);
+        if(req.decoded['role']!= 'user'){
+            return res.status(500).json('e')
+        }
+        const result = await Dbquery.deleteAnswers(req.decoded['id'],req.body.commentId);
         return res.status(200).json(result);
     } catch(error){
         return res.status(500).json(error);

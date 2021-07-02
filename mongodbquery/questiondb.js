@@ -3,12 +3,13 @@ var config = require('../config');
 const uri = config.mongodb;
 var ObjectID = require('mongodb').ObjectID;
 
-let getQuestions_all = async(data)=>{
+let getQuestions_all = async(skip= 0,limit = 5)=>{
     try{
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
         const query = {'live':'true'};
-        const result = await client.db("ptud-15").collection("questions").find(query).skip(1 * data.skip||0).limit(1 * data.limit||5).toArray();
+        const result = await client.db("ptud-15").collection("questions").find(query).
+        skip(skip).limit(limit).toArray();
         const count = await client.db("ptud-15").collection("questions").find(query).count();
         await client.close();
         return {result,count};
@@ -16,12 +17,14 @@ let getQuestions_all = async(data)=>{
         throw err;
     }   
 }
-let getQuestions_ID = async(data)=>{
+let getQuestions_ID = async(questionId)=>{
     try{
-        const question_id = ObjectID(data.id);
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
-        const result = await client.db("ptud-15").collection("questions").aggregate([{$match:{'_id':question_id}},{$lookup:{from:'users',localField:'author',foreignField:'_id',as:'authors'}},{$lookup:{from:'comments',localField:'_id',foreignField:'node_id',as: 'comments'}}]).toArray();
+        const result = await client.db("ptud-15").collection("questions").aggregate([{$match:{'_id':ObjectID(questionId)}},
+        {$lookup:{from:'users',localField:'author',foreignField:'_id',as:'authors'}},
+        {$lookup:{from:'comments',localField:'_id',foreignField:'node_id',as: 'comments'}}])
+        .toArray();
         await client.close();
         return result;
     } catch(error){
@@ -29,13 +32,15 @@ let getQuestions_ID = async(data)=>{
     }
 }
 
-let getQuestions_text = async(data)=>{
+let getQuestions_text = async(text_search,skip=0,limit=5)=>{
     try{
-        const text_search = data.text;
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
-        const result = await client.db("ptud-15").collection("questions").find({'$text': { '$search' : text_search } }).skip(1 * data.skip||0).limit(1 * data.limit||5).toArray();
-        const count = await client.db("ptud-15").collection("questions").find({'$text': { '$search' : text_search } }).count();
+        const result = await client.db("ptud-15").collection("questions").find(
+            {'$text': { '$search' : text_search } })
+            .skip(skip).limit(limit).toArray();
+        const count = await client.db("ptud-15").collection("questions").find(
+            {'$text': { '$search' : text_search } }).count();
         await client.close();
         return {result,count};
     } catch (error){
@@ -44,33 +49,31 @@ let getQuestions_text = async(data)=>{
     }
 }
 //check it
-let getQuestions_user = async(data)=>{
+let getQuestions_user = async(userId,skip = 0,limit = 5)=>{
     try{
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
-        const user_id = ObjectID(data.user_id)
-        console.log(data.user_id);
-        const result = await client.db("ptud-15").collection("questions").find({'author':user_id}).skip(1 * data.skip||0).limit(1 * data.limit||5).toArray();
-        const count = await client.db("ptud-15").collection("questions").find({'author':user_id}).count();
-        console.log(result);
-        //const result = await client.db("ptud-15").collection("questions").aggregate([{$match:{'author':user_id}},{$lookup:{from:'comments',localField:'_id',foreignField:'node_id',as: 'comments'}}]).toArray();
+        const user_id = ObjectID(userId)
+        const result = await client.db("ptud-15").collection("questions").find({'author':userId})
+            .skip(skip).limit(limit).toArray();
+        const count = await client.db("ptud-15").collection("questions").find({'author':userId}).count();
         await client.close();
         return {result,count};
     } catch(error){
         throw error
     }
 }
-let postQuestions = async(data)=>{
+let postQuestions = async(userId,title,detail,tags)=>{
     try{
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
         const questions = {
-            'title':data.title,
-            'detail':data.detail,
-            'author': ObjectID(data.user_id),
+            'title':title,
+            'detail':detail,
+            'author': ObjectID(userId),
             'created_at': new Date(),
             'page_of_comment': 0,
-            'tags': data.tags.split(','),
+            'tags': tags.split(','),
             'live': 'true'
         }
         const result = await client.db("ptud-15").collection("questions").insertOne(questions);
@@ -82,12 +85,14 @@ let postQuestions = async(data)=>{
     }
 }
 
-let deleteQuestions = async(data)=>{
+let deleteQuestions = async(userId,questionsId)=>{
     try{
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
-        const delans = await client.db("ptud-15").collection("comments").deleteMany({'node_id':ObjectID(data.questionsId)});
-        const result = await client.db("ptud-15").collection("questions").deleteOne({'author':ObjectID(data.user_id),'_id':ObjectID(data.questionsId)});
+        await client.db("ptud-15").collection("comments")
+            .deleteMany({'node_id':ObjectID(questionsId)});
+        const result = await client.db("ptud-15").collection("questions")
+            .deleteOne({'author':ObjectID(userId),'_id':ObjectID(questionsId)});
         if(result['deletedCount'] == 0){
             throw err;
         }
@@ -111,16 +116,17 @@ let putQuestions = async(data)=>{
     }
 }
 
-let getQuestions_tag = async(data)=>{
+let getQuestions_tag = async(tags,skip =0,limit =0)=>{
     try{
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
-        if (typeof(data.tags) == 'string'){
-            var query = {'tags':{'$all': [data.tags]}}
+        if (typeof(tags) == 'string'){
+            var query = {'tags':{'$all': [tags]}}
         } else {
-            var query = {'tags':{'$all': data.tags}}
+            var query = {'tags':{'$all': tags}}
         }
-        const result = await client.db("ptud-15").collection("questions").find(query).toArray();
+        const result = await client.db("ptud-15").collection("questions").find(query)
+            .skip(skip).limit(limit).toArray();
         await client.close();
         return result;
     } catch(error){

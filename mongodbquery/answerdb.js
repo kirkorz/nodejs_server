@@ -3,14 +3,12 @@ var config = require('../config');
 const uri = config.mongodb;
 var ObjectID = require('mongodb').ObjectID;
 
-let getAnswers = async(data)=>{
+let getAnswers = async(nodeId, skip = 0,limit = 5)=>{
     try{
-        var skip = data.skip;
-        var limit = data.limit;
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
         var query = await client.db("ptud-15").collection("comments").find({
-            'node_id':ObjectID(data.node_id)
+            'node_id':ObjectID(nodeId)
         })
         var result = [];
         query = await query.sort({"page":1}).toArray();
@@ -38,30 +36,23 @@ let getAnswers = async(data)=>{
                 break;
             }
         }
-        // const result = await client.db("ptud-15").collection("comments").findOne({
-        //     'node_id':ObjectID(data.node_id),
-        //     'page': data.page * 1
-        // });
-        // const count = await client.db("ptud-15").collection("questions").findOne({'_id':ObjectID(data.node_id)},{ projection:{'page_of_comment':1}});
-        // await client.close();
-        // console.log(result);
-        return {result,skip: data.skip,limit: data.limit};
+        return {result,skip: skip,limit: limit};
     } catch(err){
         throw err;
     }   
 }
 
-let postAnswers = async(data)=>{
+let postAnswers = async(userId, nodeId, comment)=>{
     try{  
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
-        const node = await client.db("ptud-15").collection("questions").findOne({'_id':ObjectID(data.node_id)});
-        const author = await client.db("ptud-15").collection("users").findOne({'_id':ObjectID(data.user_id)})
+        const node = await client.db("ptud-15").collection("questions").findOne({'_id':ObjectID(nodeId)});
+        const author = await client.db("ptud-15").collection("users").findOne({'_id':ObjectID(userId)})
         var comment = {
             '_id':new ObjectID(),
             'posted': new Date(),
             'author': author,
-            'text': data.comment,
+            'text': comment,
             'star': 0
         }
 
@@ -72,10 +63,10 @@ let postAnswers = async(data)=>{
             {
                 '$inc':{'count':1},
                 '$push':{'comments':comment}
-            }//,{upsert : true}
+            }
         ); 
         if(!result['modifiedCount']){
-            const result1 = await client.db("ptud-15").collection("questions").updateOne(
+            await client.db("ptud-15").collection("questions").updateOne(
             {
                 '_id':node['_id'],
                 'page_of_comment':node['page_of_comment']
@@ -84,7 +75,7 @@ let postAnswers = async(data)=>{
                 '$inc':{ 'page_of_comment':1}
             }
             ); 
-            const result2 = await client.db("ptud-15").collection("comments").updateOne(
+            await client.db("ptud-15").collection("comments").updateOne(
                 {
                     'node_id': node['_id'],
                     'page':node['page_of_comment'] + 1
@@ -102,14 +93,14 @@ let postAnswers = async(data)=>{
     }   
 }
 
-let deleteAnswers = async(data)=>{
+let deleteAnswers = async(userId,commentId)=>{
     try {
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
-        const result = await client.db("ptud-15").collection("comments").updateOne({'comments._id':ObjectID(data.id)},
+        const result = await client.db("ptud-15").collection("comments").updateOne({'comments._id':ObjectID(commentId)},
         {
             '$inc':{ 'count':-1},
-            '$pull': { 'comments': { '_id': ObjectID(data.id),'author._id': ObjectID(data.user_id) } }
+            '$pull': { 'comments': { '_id': ObjectID(commentId),'author._id': ObjectID(userId) } }
         })
         await client.close();
         return result; 

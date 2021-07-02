@@ -28,13 +28,13 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
+// app.use('/', indexRouter);
 // app.use('/auth',authRouter);
-app.use('/api/public',publicRouter);
-app.use('/users',AuthMiddleWare.isAuth, usersRouter);
-app.use('/api',AuthMiddleWare.isAuth,questionsRouter);
-app.use('/api',AuthMiddleWare.isAuth,answersRouter);
-app.use('/api',AuthMiddleWare.isAuth,votesRouter);
+// app.use('/users',AuthMiddleWare.isAuth, usersRouter);
+app.use('/api',AuthMiddleWare.authv2,publicRouter);
+app.use('/api',AuthMiddleWare.authv2,questionsRouter);
+app.use('/api',AuthMiddleWare.authv2,answersRouter);
+app.use("/api",AuthMiddleWare.authv2,votesRouter);
 app.use('/mod',AuthMiddleWare.isMod,modRouter);
 
 // catch 404 and forward to error handler

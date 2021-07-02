@@ -54,8 +54,19 @@ let isMod = async(req,res,next)=>{
         return res.status(403).send({message: 'No token provided.'})
     }
 }
+let authv2 = async(req,res,next)=>{
+    const tokenFromClient = req.body.token || req.query.token || req.headers["x-access-token"];
+    try{
+        const decoded = await jwtHelper.verifyToken(tokenFromClient,accessTokenSecret);
+        req.decoded = decoded;
+        next();
+    } catch(error){
+        next()
+    }
+}
 
 module.exports = {
     isAuth: isAuth,
-    isMod: isMod
+    isMod: isMod,
+    authv2:authv2
 }

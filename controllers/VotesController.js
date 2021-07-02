@@ -2,12 +2,27 @@ const Dbquery = require('../mongodbquery/votedb')
 
 let makeVote =  async(req,res) => {
     try{
-        req.body.userId = req.decoded['id'];
-        const result = await Dbquery.postVotes(req.body);
+        if(req.decoded['role'] != 'user'){
+            return res.status(500).json('e');    
+        }
+        const result = await Dbquery.postVote(req.decoded['id'],req.body.objectId,req.body.upVote);
         return res.status(200).json(result);
-    } catch(error){
-        console.log(error);
+    } catch(e){
+        console.log(e);
         return res.status(500).json(error);
+    }
+}
+
+let makeReport = async(req,res)=>{
+    try{
+        if(req.decoded['role'] != 'user'){
+            return res.status(500).json('e');    
+        }
+        const result = await Dbquery.postReport(req.decoded['id'],objectId)
+        return res.status(200).json(result);
+    } catch(e){
+        console.log(e);
+        return res.status(500).json(e);
     }
 }
 // let getVote = async(req,res) => {
@@ -22,5 +37,6 @@ let makeVote =  async(req,res) => {
 
 module.exports = {
     makeVote: makeVote,
+    makeReport: makeReport
     // getVote: getVote
 }

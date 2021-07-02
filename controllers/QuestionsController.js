@@ -1,9 +1,12 @@
 const Dbquery = require('../mongodbquery/questiondb')
 
+
 let getQuestions_user = async(req,res) =>{
     try{
-        req.body.user_id = req.decoded['id'];
-        const result = await Dbquery.getQuestions_user(req.body)
+        if(req.decoded['role']!='user'){
+            return res.status(500).json('e')
+        }        
+        const result = await Dbquery.getQuestions_user(req.decoded['id'])
         return res.status(200).json(result);
     } catch(error){
         return res.status(500).json(error);
@@ -11,8 +14,10 @@ let getQuestions_user = async(req,res) =>{
 }
 let postQuestions = async(req,res) => {
     try{
-        req.body.user_id = req.decoded['id'];
-        const result = await Dbquery.postQuestions(req.body)
+        if(req.decoded['role']!='user'){
+            return res.status(500).json('e')
+        }
+        const result = await Dbquery.postQuestions(req.body.userId,req.body.title,req.body.detail,req.body.tags)
         return res.status(200).json(result);
     } catch(error){
         return res.status(500).json(error);
@@ -20,8 +25,7 @@ let postQuestions = async(req,res) => {
 }
 let getQuestions_Id = async(req,res) => {
     try{
-        req.body.id = req.params.questionsId;
-        const result = await Dbquery.getQuestions_ID(req.body);
+        const result = await Dbquery.getQuestions_ID(req.params.questionsId);
         return res.status(200).json(result);
     } catch(error){
         return res.status(500).json(error);
@@ -29,9 +33,7 @@ let getQuestions_Id = async(req,res) => {
 }
 let getQuestions_all = async(req,res) => {
     try{
-        // req.body.skip = 0;
-        // req.body.limit = 5;
-        const result = await Dbquery.getQuestions_all(req.body);
+        const result = await Dbquery.getQuestions_all();
         return res.status(200).json(result);
     } catch(error){
         return res.status(500).json(error);
@@ -39,29 +41,30 @@ let getQuestions_all = async(req,res) => {
 }
 let deleteQuestions = async(req,res)=>{
     try{
-        req.body.user_id = req.decoded['id'];
-        req.body.questionsId = req.params.questionsId;
-        const result = await Dbquery.deleteQuestions(req.body);
+        if(req.decoded['role']!='user'){
+            return res.status.json('e')
+        }
+        const result = await Dbquery.deleteQuestions(req.decoded['id'],req.params.questionsId);
         return res.status(200).json(result);
     } catch(error){
         return res.status(500).json(error);
     }
 }
 
-let putQuestions = async(req,res)=>{
-    try{
-        req.body.user_id = req.decoded['id'];
-        req.body.questionsId = req.params.questionsId;
-        const result = await Dbquery.putQuestions(req.body);
-        return res.status(200).json(result);
-    } catch(error){
-        return res.status(500).json(error);
-    }
-}
+// let putQuestions = async(req,res)=>{
+//     try{
+//         req.body.user_id = req.decoded['id'];
+//         req.body.questionsId = req.params.questionsId;
+//         const result = await Dbquery.putQuestions(req.body);
+//         return res.status(200).json(result);
+//     } catch(error){
+//         return res.status(500).json(error);
+//     }
+// }
 
 let searchQuestions = async(req,res) => {
     try{
-        const result = await Dbquery.getQuestions_text(req.body); 
+        const result = await Dbquery.getQuestions_text(req.body.text_search); 
         return res.status(200).json(result);
     } catch (error){
         return res.status(500).json(error);
@@ -70,7 +73,7 @@ let searchQuestions = async(req,res) => {
 
 let searchQuestionsbytags = async(req,res) => {
     try{
-        const result = await Dbquery.getQuestions_tag(req.body); 
+        const result = await Dbquery.getQuestions_tag(req.body.tags); 
         return res.status(200).json(result);
     } catch (error){
         console.log(error);
@@ -83,7 +86,7 @@ module.exports = {
     getQuestions_Id:getQuestions_Id,
     getQuestions_all:getQuestions_all,
     deleteQuestions:deleteQuestions,
-    putQuestions:putQuestions,
+    // putQuestions:putQuestions,
     searchQuestions:searchQuestions,
     searchQuestionsbytags:searchQuestionsbytags
 }

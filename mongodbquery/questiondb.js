@@ -3,13 +3,18 @@ var config = require('../config');
 const uri = config.mongodb;
 var ObjectID = require('mongodb').ObjectID;
 
-let getQuestions_all = async(skip= 0,limit = 5)=>{
+let getQuestions_all = async(skip= 0,limit = 5,category = null)=>{
     try{
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
-        const query = {'live':'true'};
+        if(category !=null){
+            var query = {'live':true,"category":{"$in":[category]}};
+        }
+        else{
+            var query = {'live':true};
+        }
         const result = await client.db("ptud-15").collection("questions").find(query).
-        skip(skip).limit(limit).toArray();
+        skip(1 * skip).limit(1 * limit).toArray();
         const count = await client.db("ptud-15").collection("questions").find(query).count();
         await client.close();
         return {result,count};
@@ -54,9 +59,9 @@ let getQuestions_user = async(userId,skip = 0,limit = 5)=>{
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
         const user_id = ObjectID(userId)
-        const result = await client.db("ptud-15").collection("questions").find({'author':userId})
+        const result = await client.db("ptud-15").collection("questions").find({'author':ObjectID(userId)})
             .skip(skip).limit(limit).toArray();
-        const count = await client.db("ptud-15").collection("questions").find({'author':userId}).count();
+        const count = await client.db("ptud-15").collection("questions").find({'author':ObjectID(userId)}).count();
         await client.close();
         return {result,count};
     } catch(error){
@@ -74,7 +79,7 @@ let postQuestions = async(userId,title,detail,tags)=>{
             'created_at': new Date(),
             'page_of_comment': 0,
             'tags': tags.split(','),
-            'live': 'true'
+            'live': false
         }
         const result = await client.db("ptud-15").collection("questions").insertOne(questions);
         await client.close();

@@ -4,10 +4,9 @@ const axios = require('axios');
 
 let getAnswers = async(req,res) =>{
     try{
-        const result = await Dbquery.getAnswers(req.body);
+        const result = await Dbquery.getAnswers(req.params.nodeId,req.body.skip,req.body.limit);
         return res.status(200).json(result);
     } catch(error){
-        console.log(error);
         return res.status(500).json(error);
     }
 }
@@ -17,7 +16,7 @@ let postAnswers = async(req,res) =>{
         if(req.decoded['role']!='user'){
             return res.status(500).json('e');
         }
-        const result = await Dbquery.postAnswers(req.decoded['id'],req.body.nodeId,comment);
+        const result = await Dbquery.postAnswers(req.decoded['id'],req.body.nodeId,req.body.comment);
         return res.status(200).json(result);
     } catch(error){
         return res.status(500).json(error);

@@ -3,7 +3,7 @@ const Dbquery = require('../mongodbquery/questiondb')
 
 let getQuestions_user = async(req,res) =>{
     try{
-        if(req.decoded['role']!='user'){
+        if(req.decoded['role'] != 'user'){
             return res.status(500).json('e')
         }        
         const result = await Dbquery.getQuestions_user(req.decoded['id'])
@@ -17,7 +17,7 @@ let postQuestions = async(req,res) => {
         if(req.decoded['role']!='user'){
             return res.status(500).json('e')
         }
-        const result = await Dbquery.postQuestions(req.body.userId,req.body.title,req.body.detail,req.body.tags)
+        const result = await Dbquery.postQuestions(req.decoded['id'],req.body.title,req.body.detail,req.body.tags)
         return res.status(200).json(result);
     } catch(error){
         return res.status(500).json(error);
@@ -33,9 +33,20 @@ let getQuestions_Id = async(req,res) => {
 }
 let getQuestions_all = async(req,res) => {
     try{
-        const result = await Dbquery.getQuestions_all();
+        switch (req.body.category) {
+            case 'moinhat' || null:
+                var result = await Dbquery.getQuestions_all(req.body.skip,req.body.limit);
+                break;
+            case 'noibat':
+                var result = await Dbquery.getQuestions_all(req.body.skip,req.body.limit);
+                break;
+            default:
+                var result = await Dbquery.getQuestions_all(req.body.skip,req.body.limit,req.body.category);
+                break;
+        }
         return res.status(200).json(result);
     } catch(error){
+        console.log(error)
         return res.status(500).json(error);
     }
 }

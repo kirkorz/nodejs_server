@@ -3,7 +3,7 @@ const Dbquery = require('../mongodbquery/publicdb');
 
 let makePublic = async(req,res) =>{
     try{
-        const result = await Dbquery.makePublic(req.body);
+        const result = await Dbquery.makePublic(req.body.questionsId);
         return res.status(200).json(result);
     } catch(error){
         console.log(error);
@@ -13,23 +13,24 @@ let makePublic = async(req,res) =>{
 
 let deleteQuestion = async(req,res) =>{
     try{
-        const result = await Dbquery.deleteQuestion(req.body);
+        const result = await Dbquery.deleteQuestion(req.body.questionsId);
         return res.status(200).json(result);
     } catch(error){
         return res.status(500).json(error);
     }
 }
-let notcheck = async(req,res) =>{
+let getUnlive = async(req,res) =>{
     try{
-        const result = await Dbquery.notcheck(req.body);
+        const result = await Dbquery.getUnlive(1 * req.body.skip,req.body.limit);
         return res.status(200).json(result);
     } catch(error){
+        console.log(error);
         return res.status(500).json(error);
     }
 }
 let addCategory = async(req,res)=>{
     try{
-        const result = await Dbquery.addCategory(req.body);
+        const result = await Dbquery.addCategory(req.body.questionsId,req.body.category);
         return res.status(200).json(result);
     } catch(error){
         return res.status(500).json(error);
@@ -38,6 +39,6 @@ let addCategory = async(req,res)=>{
 module.exports = {
     makePublic:makePublic,
     deleteQuestion : deleteQuestion,
-    notcheck: notcheck,
+    getUnlive: getUnlive,
     addCategory: addCategory,
 }

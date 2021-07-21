@@ -5,13 +5,15 @@ var ObjectID = require('mongodb').ObjectID;
 
 let getAnswers = async(nodeId, skip = 0,limit = 5)=>{
     try{
+        sskip= 1 * skip;
+        slimit =1 * limit;
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
         var query = await client.db("ptud-15").collection("comments").find({
             'node_id':ObjectID(nodeId)
         })
         var result = [];
-        query = await query.sort({"page":1}).toArray();
+        query = await query.sort({"page":-1}).toArray();
         for(let page of query){
             new_skip = skip - page['count']
             if(new_skip >= 0){
@@ -36,7 +38,7 @@ let getAnswers = async(nodeId, skip = 0,limit = 5)=>{
                 break;
             }
         }
-        return {result,skip: skip,limit: limit};
+        return {result,skip: sskip,limit: slimit,count: query.length};
     } catch(err){
         throw err;
     }   

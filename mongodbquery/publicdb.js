@@ -3,24 +3,23 @@ var config = require('../config');
 const uri = config.mongodb;
 var ObjectID = require('mongodb').ObjectID;
 
-let makePublic = async(data)=>{
+let makePublic = async(questionsId)=>{
     try{
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
-        const result = await client.db("ptud-15").collection("questions").updateOne({'_id':ObjectID(data.questionsId)},{"$set": {'live':'true'}});
+        const result = await client.db("ptud-15").collection("questions").updateOne({'_id':ObjectID(questionsId)},{"$set": {'live':true}});
         await client.close();
-        console.log(result);
         return result;
     } catch(err){
         throw err;
     }   
 }
-let deleteQuestion = async(data)=>{
+let deleteQuestion = async(questionsId)=>{
     try{
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
-        const delans = await client.db("ptud-15").collection("comments").deleteMany({'node_id':ObjectID(data.questionsId)});
-        const result = await client.db("ptud-15").collection("questions").deleteOne({'_id':ObjectID(data.questionsId)});        
+        const delans = await client.db("ptud-15").collection("comments").deleteMany({'node_id':ObjectID(questionsId)});
+        const result = await client.db("ptud-15").collection("questions").deleteOne({'_id':ObjectID(questionsId)});        
         await client.close();
         return result;
     } catch(error){
@@ -28,12 +27,12 @@ let deleteQuestion = async(data)=>{
     }
 }
 
-let notcheck = async(data)=>{
+let getUnlive = async(skip = 0, limit = 5)=>{
     try{
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
-        const query = {'live':'false'};
-        const result = await client.db("ptud-15").collection("questions").find(query).skip(1 * data.skip||0).limit(data.limit||5).toArray();
+        const query = {'live':false};
+        const result = await client.db("ptud-15").collection("questions").find(query).skip(skip).limit(limit).toArray();
         const count = await client.db("ptud-15").collection("questions").find(query).count();
         await client.close();
         return {result,count};
@@ -41,15 +40,14 @@ let notcheck = async(data)=>{
         throw err;
     }   
 }
-let addCategory = async(data)=>{
+let addCategory = async(questionsId,category)=>{
     try{
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
-        const query = {'_id':ObjectID(data.questionsId)};
-        const options = {'$push':{'category':{ "$each": data.category.split(',')}}};
+        const query = {'_id':ObjectID(questionsId)};
+        const options = {'$push':{'category':{ "$each": category.split(',')}}};
         const result = await client.db("ptud-15").collection("questions").updateOne(query,options,{"upsert" : true});
         await client.close();
-        console.log(result);
         return result;
     } catch(err){
         throw err;
@@ -58,6 +56,6 @@ let addCategory = async(data)=>{
 module.exports={
     makePublic : makePublic,
     deleteQuestion: deleteQuestion,
-    notcheck: notcheck,
+    getUnlive: getUnlive,
     addCategory:addCategory
 }

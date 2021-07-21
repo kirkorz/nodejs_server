@@ -4,10 +4,5 @@ const QuestionsController = require("../controllers/QuestionsController");
 const AnswersController = require("../controllers/AnswersController");
 
 
-router.get("/answers/",AnswersController.getAnswers); 
-router.get("/questions/all",QuestionsController.getQuestions_all);
-router.get("/questions/search",QuestionsController.searchQuestions);
-router.get("/questions/tags",QuestionsController.searchQuestionsbytags)
-router.get("/questions/:questionsId",QuestionsController.getQuestions_Id);
 
 module.exports = router;

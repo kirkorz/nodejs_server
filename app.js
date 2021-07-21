@@ -31,11 +31,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 // app.use('/', indexRouter);
 // app.use('/auth',authRouter);
 // app.use('/users',AuthMiddleWare.isAuth, usersRouter);
-app.use('/api',AuthMiddleWare.authv2,publicRouter);
-app.use('/api',AuthMiddleWare.authv2,questionsRouter);
-app.use('/api',AuthMiddleWare.authv2,answersRouter);
-app.use("/api",AuthMiddleWare.authv2,votesRouter);
-app.use('/mod',AuthMiddleWare.isMod,modRouter);
+app.use('/api/questions',AuthMiddleWare.authv2,questionsRouter);
+app.use('/api/answers',AuthMiddleWare.authv2,answersRouter);
+app.use("/api/votes",AuthMiddleWare.authv2,votesRouter);
+app.use('/mod',AuthMiddleWare.authv2,modRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

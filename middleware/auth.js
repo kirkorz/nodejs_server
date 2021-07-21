@@ -61,6 +61,7 @@ let authv2 = async(req,res,next)=>{
         req.decoded = decoded;
         next();
     } catch(error){
+        req.decoded = {'role':'guest','id':'60f4e970991ec70b1cfd3677'};
         next()
     }
 }

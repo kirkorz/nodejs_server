@@ -1,11 +1,13 @@
-const Dbquery = require('../mongodbquery/votedb')
+const Dbquery = require('../mongodbquery/votedb');
+const Dbquery2 = require('../mongodbquery/questiondb');
 
 let makeVote =  async(req,res) => {
     try{
         if(req.decoded['role'] != 'user'){
             return res.status(500).json('e');    
         }
-        const result = await Dbquery.postVote(req.decoded['id'],req.body.objectId,req.body.upVote);
+        await Dbquery.postVote(req.decoded['id'],req.body.objectId,req.body.upVote);
+        const result = await Dbquery2.getQuestions_ID(req.body.objectId);
         return res.status(200).json(result);
     } catch(e){
         console.log(e);

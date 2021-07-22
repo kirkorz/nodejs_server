@@ -27,9 +27,9 @@ let getQuestions_ID = async(questionId)=>{
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
         const result = await client.db("ptud-15").collection("questions").aggregate([{$match:{'_id':ObjectID(questionId)}},
-        {$lookup:{from:'users',localField:'author',foreignField:'_id',as:'authors'}},
-        {$lookup:{from:'comments',localField:'_id',foreignField:'node_id',as: 'comments'}}])
-        .toArray();
+        {$lookup:{from:'users',localField:'author',foreignField:'_id',as:'authors'}}]).toArray();
+        // {$lookup:{from:'comments',localField:'_id',foreignField:'node_id',as: 'comments'}}])
+        // .toArray();
         await client.close();
         return result;
     } catch(error){

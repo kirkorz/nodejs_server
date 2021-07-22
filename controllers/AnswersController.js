@@ -4,7 +4,7 @@ const axios = require('axios');
 
 let getAnswers = async(req,res) =>{
     try{
-        const result = await Dbquery.getAnswers(req.params.nodeId,req.body.skip,req.body.limit);
+        const result = await Dbquery.getAnswers(req.params.nodeId,req.body.skip,req.body.limit,req.body.noibat);
         return res.status(200).json(result);
     } catch(error){
         return res.status(500).json(error);

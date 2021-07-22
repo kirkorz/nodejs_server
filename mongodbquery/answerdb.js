@@ -3,12 +3,17 @@ var config = require('../config');
 const uri = config.mongodb;
 var ObjectID = require('mongodb').ObjectID;
 
-let getAnswers = async(nodeId, skip = 0,limit = 5)=>{
-    try{
-        sskip= 1 * skip;
-        slimit =1 * limit;
+let getAnswers = async(nodeId, skip = 0,limit = 5,noibat = false)=>{
+    try{  
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
+        sskip= 1 * skip;
+        slimit = 1 * limit;
+        if(noibat == true){
+            console.log("????")
+            skip = 0;
+            limit = await client.db("ptud-15").collection("question").findOne({'_id':ObjectID(nodeId)})['page_of_comment'] * 5
+        }
         var query = await client.db("ptud-15").collection("comments").find({
             'node_id':ObjectID(nodeId)
         })
@@ -16,6 +21,7 @@ let getAnswers = async(nodeId, skip = 0,limit = 5)=>{
         query = await query.sort({"page":-1}).toArray();
         for(let page of query){
             new_skip = skip - page['count']
+            page['comments'] = page['comments'].reverse();
             if(new_skip >= 0){
                 skip =  new_skip;
                 continue;
@@ -38,6 +44,10 @@ let getAnswers = async(nodeId, skip = 0,limit = 5)=>{
                 break;
             }
         }
+        if(noibat == true){
+            result.sort((a, b) => parseFloat(b.star) - parseFloat(a.star));
+            result = result.slice(sskip,sskip + slimit);
+        }
         return {result,skip: sskip,limit: slimit,count: query.length};
     } catch(err){
         throw err;
@@ -55,7 +65,7 @@ let postAnswers = async(userId, nodeId, comment)=>{
             'posted': new Date(),
             'author': author,
             'text': comment,
-            'star': 0
+            'star': Math.floor(Math.random() * 100)
         }
 
         const result = await client.db("ptud-15").collection("comments").updateOne(

@@ -6,8 +6,6 @@ const AnswersController = require("../controllers/AnswersController");
 
 router.post("/",AnswersController.postAnswers);
 router.delete("/",AnswersController.deleteAnswers);
-
-//pub
 router.get("/:nodeId",AnswersController.getAnswers); 
 
 module.exports = router;

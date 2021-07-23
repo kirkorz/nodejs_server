@@ -5,6 +5,7 @@ var ObjectID = require('mongodb').ObjectID;
 
 let getAnswers = async(nodeId, skip = 0,limit = 5,noibat = false)=>{
     try{  
+        console.log(noibat);
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
         sskip= 1 * skip;

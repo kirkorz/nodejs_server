@@ -38,7 +38,7 @@ let getQuestions_all = async(req,res) => {
                 var result = await Dbquery.getQuestions_all(req.body.skip,req.body.limit);
                 break;
             case 'noibat':
-                var result = await Dbquery.getQuestions_all(req.body.skip,req.body.limit);
+                var result = await Dbquery.getQuestions_noibat(req.body.skip,req.body.limit);
                 break;
             default:
                 var result = await Dbquery.getQuestions_all(req.body.skip,req.body.limit,req.body.category);

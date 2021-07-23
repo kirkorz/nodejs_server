@@ -3,6 +3,20 @@ var config = require('../config');
 const uri = config.mongodb;
 var ObjectID = require('mongodb').ObjectID;
 
+const getQuestions_noibat = async(skip= 0,limit = 5)=>{
+    try{
+        const client = new MongoClient(uri, { useUnifiedTopology: true } );
+        await client.connect({native_parser:true});
+        var query = {'live':true};
+        const result = await client.db("ptud-15").collection("questions").find(query).sort({"upvote":-1}).
+        skip(1 * skip).limit(1 * limit).toArray();
+        const count = await client.db("ptud-15").collection("questions").find(query).count();
+        await client.close();
+        return {result,count};
+    } catch(err){
+        throw err;
+    }   
+}
 let getQuestions_all = async(skip= 0,limit = 5,category = null)=>{
     try{
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
@@ -41,11 +55,11 @@ let getQuestions_text = async(text_search,skip=0,limit=5)=>{
     try{
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
-        const result = await client.db("ptud-15").collection("questions").find(
-            {'$text': { '$search' : text_search } })
-            .skip(skip).limit(limit).toArray();
-        const count = await client.db("ptud-15").collection("questions").find(
-            {'$text': { '$search' : text_search } }).count();
+        const sort = { "score": { "$meta": "textScore" } };
+        const result_0 = await client.db("ptud-15").collection("questions").find({ "$text": { "$search": text_search + " -"+ ""} })
+        .sort(sort).toArray();
+        const count = result_0.length
+        const result = result_0.slice(skip,skip + limit)
         await client.close();
         return {result,count};
     } catch (error){
@@ -79,7 +93,9 @@ let postQuestions = async(userId,title,detail,tags)=>{
             'created_at': new Date(),
             'page_of_comment': 0,
             'tags': tags.split(','),
-            'live': false
+            'live': true,
+            'upvote': Math.floor(Math.random() * 1000),
+            'downvote': Math.floor(Math.random() * 100),
         }
         const result = await client.db("ptud-15").collection("questions").insertOne(questions);
         await client.close();
@@ -148,7 +164,8 @@ module.exports ={
     postQuestions:postQuestions,
     putQuestions:putQuestions,
     deleteQuestions:deleteQuestions,
-    getQuestions_tag:getQuestions_tag
+    getQuestions_tag:getQuestions_tag,
+    getQuestions_noibat:getQuestions_noibat
 }
 
 

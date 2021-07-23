@@ -10,7 +10,6 @@ let makeVote =  async(req,res) => {
         const result = await Dbquery2.getQuestions_ID(req.body.objectId);
         return res.status(200).json(result);
     } catch(e){
-        console.log(e);
         return res.status(500).json(error);
     }
 }

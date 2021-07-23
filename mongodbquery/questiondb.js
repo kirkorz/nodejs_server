@@ -7,9 +7,18 @@ const getQuestions_noibat = async(skip= 0,limit = 5)=>{
     try{
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
-        var query = {'live':true};
-        const result = await client.db("ptud-15").collection("questions").find(query).sort({"upvote":-1}).
-        skip(1 * skip).limit(1 * limit).toArray();
+        var last = new Date();
+        last.setMonth(last.getMonth()-1);
+        var query = {
+            'live':true,
+            "created_at": 
+                {
+                    $gte: last 
+                }
+            };
+        const result = await client.db("ptud-15").collection("questions").find(query)
+        .sort({"upvote":-1})
+        .skip(1 * skip).limit(1 * limit).toArray();
         const count = await client.db("ptud-15").collection("questions").find(query).count();
         await client.close();
         return {result,count};
@@ -29,7 +38,8 @@ let getQuestions_all = async(skip= 0,limit = 5,category = null)=>{
         }
         const result = await client.db("ptud-15").collection("questions").find(query).
         skip(1 * skip).limit(1 * limit).toArray();
-        const count = await client.db("ptud-15").collection("questions").find(query).count();
+        // const count = await client.db("ptud-15").collection("questions").find(query).count();
+        const count = await client.db("ptud-15").collection("questions").estimatedDocumentCount();
         await client.close();
         return {result,count};
     } catch(err){

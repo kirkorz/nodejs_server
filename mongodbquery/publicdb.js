@@ -53,9 +53,10 @@ let addCategory = async(questionsId,category)=>{
         throw err;
     }   
 }
+
 module.exports={
     makePublic : makePublic,
     deleteQuestion: deleteQuestion,
     getUnlive: getUnlive,
-    addCategory:addCategory
+    addCategory:addCategory,
 }

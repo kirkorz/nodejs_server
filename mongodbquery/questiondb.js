@@ -2,6 +2,7 @@ const { MongoClient } = require('mongodb');
 var config = require('../config');
 const uri = config.mongodb;
 var ObjectID = require('mongodb').ObjectID;
+const https = require('http')
 
 const getQuestions_noibat = async(skip= 0,limit = 5)=>{
     try{
@@ -36,8 +37,8 @@ let getQuestions_all = async(skip= 0,limit = 5,category = null)=>{
         else{
             var query = {'live':true};
         }
-        const result = await client.db("ptud-15").collection("questions").find(query).
-        skip(1 * skip).limit(1 * limit).toArray();
+        const result = await client.db("ptud-15").collection("questions").find(query).sort({"created_at": -1})
+        .skip(1 * skip).limit(1 * limit).toArray();
         // const count = await client.db("ptud-15").collection("questions").find(query).count();
         const count = await client.db("ptud-15").collection("questions").estimatedDocumentCount();
         await client.close();
@@ -94,24 +95,57 @@ let getQuestions_user = async(userId,skip = 0,limit = 5)=>{
 }
 let postQuestions = async(userId,title,detail,tags)=>{
     try{
+        let auto = require('../config.json');
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
-        const questions = {
+        var questions = {
             'title':title,
             'detail':detail,
             'author': ObjectID(userId),
             'created_at': new Date(),
             'page_of_comment': 0,
             'tags': tags.split(','),
-            'live': true,
+            'live': false,
             'upvote': Math.floor(Math.random() * 1000),
             'downvote': Math.floor(Math.random() * 100),
         }
-        const result = await client.db("ptud-15").collection("questions").insertOne(questions);
-        await client.close();
-        return result;
+        if(auto['status'] == true){
+            var url = 'http://127.0.0.1:5000/predict?title='+ questions['title'];
+
+            https.get(url, function(res){
+                var body = '';
+
+                res.on('data', function(chunk){
+                    body += chunk;
+                });
+
+                res.on('end', function(){
+                    var label = JSON.parse(body);
+                    console.log("Got a response: ", label['result']);
+                    const category = label['result']
+                    if(category == 1){
+                        questions['category'] = ["maychu"]
+                    }
+                    else{
+                        questions['category'] = ["laptrinh"]
+                    }
+                    questions['live'] = true;
+                    client.db("ptud-15").collection("questions").insertOne(questions,(result,err)=>{
+                        client.close();
+                        return result;
+                    });
+                });
+            }).on('error', function(e){
+                console.log("Got an error: ", e);
+            });
+        }else{
+            const result = await client.db("ptud-15").collection("questions").insertOne(questions);
+            await client.close();
+            return result;
+        }
     }
     catch (error){
+        console.log(error);
         throw error;
     }
 }

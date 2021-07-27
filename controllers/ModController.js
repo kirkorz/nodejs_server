@@ -1,4 +1,5 @@
 const Dbquery = require('../mongodbquery/publicdb');
+var fs = require('fs');
 
 
 let makePublic = async(req,res) =>{
@@ -36,9 +37,30 @@ let addCategory = async(req,res)=>{
         return res.status(500).json(error);
     }
 }
+const getAuto = (req,res)=>{
+    try {
+        let auto = require('../config.json');   
+        res.status(200).json(auto)    
+    } catch (error) {
+        return res.status(500).json(error);
+    }
+}
+const setAuto = (req,res)=>{
+    try {
+        let auto = require('../config.json');  
+        auto['status'] = !auto['status'];
+        fs.writeFileSync('../config.json', JSON.stringify(auto)); 
+        res.status(200).json(auto)    
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json(error);
+    }
+}
 module.exports = {
     makePublic:makePublic,
     deleteQuestion : deleteQuestion,
     getUnlive: getUnlive,
     addCategory: addCategory,
+    getAuto:getAuto,
+    setAuto:setAuto
 }

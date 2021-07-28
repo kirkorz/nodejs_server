@@ -49,8 +49,10 @@ const setAuto = (req,res)=>{
     try {
         let auto = require('../config.json');  
         auto['status'] = !auto['status'];
-        fs.writeFileSync('../config.json', JSON.stringify(auto)); 
-        res.status(200).json(auto)    
+        fs.writeFile('../config.json', JSON.stringify(auto), 'utf8',()=>{
+            res.status(200).json(auto);
+        });
+        // fs.writeFileSync('../config.txt', JSON.stringify(auto)); 
     } catch (error) {
         console.log(error)
         return res.status(500).json(error);

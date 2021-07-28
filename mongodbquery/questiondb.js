@@ -110,7 +110,7 @@ let postQuestions = async(userId,title,detail,tags)=>{
             'downvote': Math.floor(Math.random() * 100),
         }
         if(auto['status'] == true){
-            var url = 'http://127.0.0.1:5000/predict?title='+ questions['title'];
+            var url = 'http://baor000.pythonanywhere.com/predict?title='+ questions['title'];
 
             https.get(url, function(res){
                 var body = '';

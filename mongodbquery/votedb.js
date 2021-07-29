@@ -138,7 +138,7 @@ let setReport = async(reportId)=>{
         await client.connect({native_parser:true});
         const result = await client.db("ptud-15").collection("reports").updateOne({
             "_id": reportId
-        },{"status": true})
+        },{"$set": {"status": true}})
         await client.close();
         return result;
     } catch(err){

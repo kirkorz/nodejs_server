@@ -21,7 +21,6 @@ let makeReport = async(req,res)=>{
         const result = await Dbquery.postReport(req.decoded['id'],req.body.objectId,req.body.content)
         return res.status(200).json(result);
     } catch(e){
-        console.log(e);
         return res.status(500).json(e);
     }
 }

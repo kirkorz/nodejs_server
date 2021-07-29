@@ -91,7 +91,7 @@ let postReport = async(userId,objectId,content)=>{
     try{
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
-        const result = await client.db("ptud-15").collection("reports").updateOne({
+        const result = await client.db("ptud-15").collection("reports").insertOne({
             "object":ObjectID(objectId),
             "user" : ObjectID(userId),
             "content": content,

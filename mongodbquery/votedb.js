@@ -137,7 +137,7 @@ let setReport = async(reportId)=>{
         const client = new MongoClient(uri, { useUnifiedTopology: true } );
         await client.connect({native_parser:true});
         const result = await client.db("ptud-15").collection("reports").updateOne({
-            "_id": reportId
+            "_id": ObjectId(reportId)
         },{"$set": {"status": true}})
         await client.close();
         return result;

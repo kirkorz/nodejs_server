@@ -122,7 +122,7 @@ let getReport = async(skip=0,limit=5)=>{
         await client.connect({native_parser:true});
         const result = await client.db("ptud-15").collection("reports").find({
             "status": false
-        }).skip(skip).limit(limit).toArray();
+        }).skip(1 * skip).limit(1 * limit).toArray();
         const count = await client.db("ptud-15").collection("reports").find({
             "status": false
         }).count()

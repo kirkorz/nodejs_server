@@ -30,7 +30,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // app.use('/', indexRouter);
 // app.use('/auth',authRouter);
-// app.use('/users',AuthMiddleWare.isAuth, usersRouter);
+app.use('/users',AuthMiddleWare.authv2, usersRouter);
 app.use('/api/questions',AuthMiddleWare.authv2,questionsRouter);
 app.use('/api/answers',AuthMiddleWare.authv2,answersRouter);
 app.use("/api/votes",AuthMiddleWare.authv2,votesRouter);

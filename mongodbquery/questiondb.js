@@ -42,8 +42,8 @@ let getQuestions_all = async(skip= 0,limit = 5,category = null)=>{
         // const result = await client.db("ptud-15").collection("questions").find(query).sort({"created_at": -1})
         // .skip(1 * skip).limit(1 * limit).toArray();
         // const count = await client.db("ptud-15").collection("questions").find(query).count();
-        const count = result.length;
-        // const count = await client.db("ptud-15").collection("questions").estimatedDocumentCount();
+        const count = await client.db("ptud-15").collection("questions").aggregate([{$match:query},
+            {$lookup:{from:'users',localField:'author',foreignField:'_id',as:'authors'}}]).sort({"created_at": -1}).toArray().count();        // const count = await client.db("ptud-15").collection("questions").estimatedDocumentCount();
         await client.close();
         return {result,count};
     } catch(err){

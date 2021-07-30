@@ -75,7 +75,6 @@ let searchQuestionsbytags = async(req,res) => {
         const result = await Dbquery.getQuestions_tag(req.body.tags); 
         return res.status(200).json(result);
     } catch (error){
-        console.log(error);
         return res.status(500).json(error);
     }
 }

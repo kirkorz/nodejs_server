@@ -35,6 +35,9 @@ let getVote = async(req,res) => {
 }
 let getReport = async(req,res) => {
     try{
+        if(req.decoded['role']!='admin'){
+            return res.status(500).json('e');
+        }
         const result = await Dbquery.getReport(req.body.skip,req.body.limit)
         return res.status(200).json(result);
     } catch(error){
@@ -44,6 +47,9 @@ let getReport = async(req,res) => {
 }
 let setReport = async(req,res) => {
     try{
+        if(req.decoded['role']!='admin'){
+            return res.status(500).json('e');
+        }
         const result = await Dbquery.setReport(req.body.reportId)
         return res.status(200).json(result);
     } catch(error){

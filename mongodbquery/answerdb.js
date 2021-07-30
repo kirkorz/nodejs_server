@@ -64,7 +64,7 @@ let postAnswers = async(userId, nodeId, comment)=>{
         var comment = {
             '_id':new ObjectID(),
             'posted': new Date(),
-            'author': author,
+            'author': {"_id":ObjectID(author['_id']),"name": author['name']},
             'text': comment,
             'star': Math.floor(Math.random() * 100)
         }

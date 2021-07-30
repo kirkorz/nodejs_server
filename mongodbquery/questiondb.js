@@ -199,7 +199,7 @@ let getQuestions_tag = async(tags,skip =0,limit =0)=>{
             .skip(skip).limit(limit).toArray();
         const count = await client.db("ptud-15").collection("questions").find(query).toArray().count()
         await client.close();
-        return result;
+        return {result,count};
     } catch(error){
         throw error;
     }

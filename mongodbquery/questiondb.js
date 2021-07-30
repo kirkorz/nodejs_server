@@ -201,6 +201,7 @@ let getQuestions_tag = async(tags,skip =0,limit =0)=>{
         await client.close();
         return {result,count};
     } catch(error){
+        console.log(error)
         throw error;
     }
 }
